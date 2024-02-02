@@ -15,7 +15,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.bigbank.mugloar.constant.Constants.GAME_SCORES;
 import static com.bigbank.mugloar.constant.Constants.INITIAL_GAME_RETRY_LIMIT;
 
 @Slf4j
@@ -47,7 +46,7 @@ public class MugloarApplication implements CommandLineRunner {
         boolean finished = executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 
         if (finished) {
-            statisticsService.printGameStats(GAME_SCORES);
+            statisticsService.printGameStats(gameManager.getGameScores());
         } else {
             log.error("The games did not finish within the expected time.");
         }
