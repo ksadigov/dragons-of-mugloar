@@ -6,12 +6,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static com.bigbank.mugloar.constant.Constants.GAME_SCORES;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameManager {
+    private static final List<Integer> GAME_SCORES = Collections.synchronizedList(new ArrayList<>());
+
     private final GameService gameService;
     private final ShopService shopService;
     private final TaskService taskService;
@@ -39,7 +43,7 @@ public class GameManager {
             }
         } while (gameState.getScore() < gameSettings.getFinalScoreThreshold() && gameState.getLives() > 0);
 
-        GAME_SCORES.add(gameState.getScore());
+        addGameScore(gameState.getScore());
         log.info("Game {} finished. Details - Score: {}, High Score: {}, Lives: {}, Gold: {}, Level: {}, Turn: {}, Game ID: {}",
                 gameNumber,
                 gameState.getScore(),
@@ -50,5 +54,13 @@ public class GameManager {
                 gameState.getTurn(),
                 gameState.getGameId());
 
+    }
+
+    public List<Integer> getGameScores() {
+        return Collections.unmodifiableList(GAME_SCORES);
+    }
+
+    private void addGameScore(int score) {
+        GAME_SCORES.add(score);
     }
 }
