@@ -9,7 +9,7 @@ app:
     readTimeout: 1000
     connectionTimeout: 1000
   game-settings:
-    retryLimit: 111
+    retryLimit: 100
     healingPotionCost: 50
     cheapItemCost: 100
     expensiveItemCost: 300
