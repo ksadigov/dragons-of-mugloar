@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -35,7 +34,7 @@ public class MugloarApiClient {
             UriComponents url = UriComponentsBuilder.fromPath(START_NEW_GAME_ENDPOINT).build();
             var responseEntity = mugloarRestTemplate.exchange(url.toString(), HttpMethod.POST, null, GameStateDto.class);
             gameStateDto = responseEntity.getBody();
-        } catch (HttpClientErrorException ex) {
+        } catch (Exception ex) {
             String errorMessage = "Failed to start a new game. Something went wrong.";
             log.error(errorMessage, ex);
             throw new FailedStartNewGameException(errorMessage, ex);
@@ -49,7 +48,7 @@ public class MugloarApiClient {
             UriComponents url = UriComponentsBuilder.fromPath(RUN_INVESTIGATION_ENDPOINT).buildAndExpand(gameId);
             var responseEntity = mugloarRestTemplate.exchange(url.toString(), HttpMethod.POST, null, ReputationDto.class);
             reputationDto = responseEntity.getBody();
-        } catch (HttpClientErrorException ex) {
+        } catch (Exception ex) {
             String errorMessage = "Failed to get reputation for gameId=" + gameId;
             log.error(errorMessage, ex);
             throw new FailedRunInvestigationException(errorMessage, ex);
@@ -64,7 +63,7 @@ public class MugloarApiClient {
             var responseEntity = mugloarRestTemplate.exchange(url.toString(), HttpMethod.GET, null, new ParameterizedTypeReference<List<MessageDto>>() {
             });
             allMessageDtos = responseEntity.getBody();
-        } catch (HttpClientErrorException ex) {
+        } catch (Exception ex) {
             String errorMessage = "Failed to get all messages for gameId=" + gameId;
             log.error(errorMessage, ex);
             throw new FailedGetAllMessagesException(errorMessage, ex);
@@ -78,7 +77,7 @@ public class MugloarApiClient {
             UriComponents url = UriComponentsBuilder.fromPath(SOLVE_TASK_ENDPOINT).buildAndExpand(gameId, taskId);
             var responseEntity = mugloarRestTemplate.exchange(url.toString(), HttpMethod.POST, null, TaskResultDto.class);
             taskResultDto = responseEntity.getBody();
-        } catch (HttpClientErrorException ex) {
+        } catch (Exception ex) {
             String errorMessage = "Failed to solve taskId=" + taskId + " for gameId= " + gameId;
             log.error(errorMessage, ex);
             throw new FailedSolveTaskException(errorMessage, ex);
@@ -93,7 +92,7 @@ public class MugloarApiClient {
             var responseEntity = mugloarRestTemplate.exchange(url.toString(), HttpMethod.GET, null, new ParameterizedTypeReference<List<ItemDto>>() {
             });
             itemDtos = responseEntity.getBody();
-        } catch (HttpClientErrorException ex) {
+        } catch (Exception ex) {
             String errorMessage = "Failed to get all shop items for gameId=" + gameId;
             log.error(errorMessage, ex);
             throw new FailedGetAllShopItemsException(errorMessage, ex);
@@ -107,7 +106,7 @@ public class MugloarApiClient {
             UriComponents url = UriComponentsBuilder.fromPath(PURCHASE_AN_ITEM_ENDPOINT).buildAndExpand(gameId, itemId);
             var responseEntity = mugloarRestTemplate.exchange(url.toString(), HttpMethod.POST, null, PurchaseResultDto.class);
             purchaseResultDto = responseEntity.getBody();
-        } catch (HttpClientErrorException ex) {
+        } catch (Exception ex) {
             String errorMessage = "Failed to purchase an itemId=" + itemId + " for gameId=" + gameId;
             log.error(errorMessage, ex);
             throw new FailedPurchaseItemException(errorMessage, ex);
