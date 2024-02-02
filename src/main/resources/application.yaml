@@ -1,0 +1,11 @@
+app:
+  rest-template:
+    timeout: 5000
+    maxConnectionsPerRoute: 100
+    maxPoolSize: 200
+    keepalive: 30
+  mugloar-client-configuration:
+    host: https://dragonsofmugloar.com/api/v2/
+    readTimeout: 1000
+    connectionTimeout: 1000
+
