@@ -21,9 +21,9 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public void doShopping(GameStateDto gameStateDto) {
-        var shopItems = getAllItems(gameStateDto.getGameId());
-        var optimalItems = optimizationService.getOptimalItems(shopItems, gameStateDto);
-        optimalItems.forEach(shopItemDto -> buyItem(gameStateDto, shopItemDto));
+        List<ItemDto> shopItems = getAllItems(gameStateDto.getGameId());
+        List<ItemDto> optimalItems = optimizationService.getOptimalItems(shopItems, gameStateDto);
+        optimalItems.forEach(item -> attemptToPurchaseItem(gameStateDto, item));
     }
 
     private List<ItemDto> getAllItems(String gameId) {
@@ -34,8 +34,8 @@ public class ShopServiceImpl implements ShopService {
         return mugloarApiClient.purchaseItem(gameId, itemId);
     }
 
-    private void buyItem(GameStateDto gameStateDto, ItemDto shopItemDto) {
-        var purchaseResultDto = purchaseItem(gameStateDto.getGameId(), shopItemDto.getId());
+    private void attemptToPurchaseItem(GameStateDto gameStateDto, ItemDto shopItemDto) {
+        PurchaseResultDto purchaseResultDto = purchaseItem(gameStateDto.getGameId(), shopItemDto.getId());
         if (purchaseResultDto.isShoppingSuccess()) {
             statisticsService.updateGameStateStatsAfterShopping(gameStateDto, purchaseResultDto);
         }
