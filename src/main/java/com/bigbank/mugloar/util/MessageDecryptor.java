@@ -9,22 +9,21 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageDecryptor {
-
     public static List<MessageDto> decryptMessages(List<MessageDto> messageDtos) {
         return messageDtos.stream()
-                .map(messageDto -> {
-                    decryptMessageIfNeeded(messageDto);
-                    return messageDto;
-                })
+                .map(MessageDecryptor::decryptMessageIfNeeded)
                 .toList();
     }
 
-    private static void decryptMessageIfNeeded(MessageDto messageDto) {
-        if (messageDto.getEncrypted() == null) return;
+    private static MessageDto decryptMessageIfNeeded(MessageDto messageDto) {
+        if (messageDto.getEncrypted() == null) return messageDto;
+
+        MessageDto decryptedMessageDto = new MessageDto();
 
         switch (messageDto.getEncrypted()) {
-            case 1 -> MessageMapper.INSTANCE.decodedWithBase64(messageDto, messageDto);
-            case 2 -> MessageMapper.INSTANCE.decodedWithRot13(messageDto, messageDto);
+            case 1 -> MessageMapper.INSTANCE.decodedWithBase64(decryptedMessageDto, messageDto);
+            case 2 -> MessageMapper.INSTANCE.decodedWithRot13(decryptedMessageDto, messageDto);
         }
+        return decryptedMessageDto;
     }
 }
