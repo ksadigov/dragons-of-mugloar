@@ -5,19 +5,18 @@ import com.bigbank.mugloar.mapper.MessageMapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageDecryptor {
 
     public static List<MessageDto> decryptMessages(List<MessageDto> messageDtos) {
-        List<MessageDto> decryptedMessageDtos = new ArrayList<>();
-        for (MessageDto messageDto : messageDtos) {
-            decryptMessageIfNeeded(messageDto);
-            decryptedMessageDtos.add(messageDto);
-        }
-        return decryptedMessageDtos;
+        return messageDtos.stream()
+                .map(messageDto -> {
+                    decryptMessageIfNeeded(messageDto);
+                    return messageDto;
+                })
+                .toList();
     }
 
     private static void decryptMessageIfNeeded(MessageDto messageDto) {
