@@ -3,7 +3,6 @@ package com.bigbank.mugloar;
 import com.bigbank.mugloar.config.GameProps;
 import com.bigbank.mugloar.game.GameManager;
 import com.bigbank.mugloar.service.StatisticsService;
-import com.bigbank.mugloar.service.impl.StatisticsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
