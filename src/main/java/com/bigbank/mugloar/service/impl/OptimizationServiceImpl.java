@@ -31,28 +31,37 @@ public class OptimizationServiceImpl implements OptimizationService {
 
     @Override
     public List<ItemDto> getOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
-        List<ItemDto> bestItems = new ArrayList<>();
-        addHealingPotionIfNecessary(shopItemDtos, gameStateDto).ifPresent(bestItems::add);
-        addAdditionalItemBasedOnGold(shopItemDtos, gameStateDto).ifPresent(bestItems::add);
-        return bestItems;
+        List<ItemDto> optimalItems = new ArrayList<>();
+
+        findHealingPotionIfNecessary(shopItemDtos, gameStateDto,
+                gameSettings.getHealingPotionCost(), gameSettings.getBaseLifeThreshold())
+                .ifPresent(optimalItems::add);
+        addItemBasedOnRemainingGold(shopItemDtos, gameStateDto.getGold() - gameSettings.getHealingPotionCost())
+                .ifPresent(optimalItems::add);
+        return optimalItems;
     }
 
-    private Optional<ItemDto> addHealingPotionIfNecessary(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
-        if (gameStateDto.getLives() < gameSettings.getBaseLifeThreshold()) {
-            return getItemByCost(shopItemDtos, gameSettings.getHealingPotionCost());
+    private Optional<ItemDto> findHealingPotionIfNecessary(List<ItemDto> shopItemDtos, GameStateDto gameStateDto, int healingPotionCost, int lifeThreshold) {
+        if (gameStateDto.getLives() < lifeThreshold) {
+            return getItemByCost(shopItemDtos, healingPotionCost);
         }
         return Optional.empty();
     }
 
-    private Optional<ItemDto> addAdditionalItemBasedOnGold(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
-        int goldAfterPossiblePurchase = gameStateDto.getGold() - gameSettings.getHealingPotionCost();
-        if (goldAfterPossiblePurchase >= gameSettings.getCheapItemCost() &&
-                goldAfterPossiblePurchase < gameSettings.getExpensiveItemCost()) {
-            return Optional.of(getRandomlyCheapItem(shopItemDtos));
-        } else if (goldAfterPossiblePurchase >= gameSettings.getExpensiveItemCost()) {
-            return Optional.of(getRandomlyExpensiveItem(shopItemDtos));
+    private Optional<ItemDto> addItemBasedOnRemainingGold(List<ItemDto> shopItemDtos, int remainingGold) {
+        if (remainingGold >= gameSettings.getCheapItemCost() && remainingGold < gameSettings.getExpensiveItemCost()) {
+            return Optional.ofNullable(getRandomItemByCostRange(shopItemDtos, gameSettings.getCheapItemCost()));
+        } else if (remainingGold >= gameSettings.getExpensiveItemCost()) {
+            return Optional.ofNullable(getRandomItemByCostRange(shopItemDtos, gameSettings.getExpensiveItemCost()));
         }
         return Optional.empty();
+    }
+
+    private ItemDto getRandomItemByCostRange(List<ItemDto> shopItemDtos, int costThreshold) {
+        List<ItemDto> filteredItems = shopItemDtos.stream()
+                .filter(item -> item.getCost() == costThreshold)
+                .toList();
+        return filteredItems.isEmpty() ? null : filteredItems.get(random.nextInt(filteredItems.size()));
     }
 
     private List<Task> generateTasksWithEvaluationScores(List<Task> tasks, boolean alertForReputation) {
@@ -125,23 +134,7 @@ public class OptimizationServiceImpl implements OptimizationService {
         return tasks.stream().filter(task -> task.getEvaluationScore() == (maxPoint)).toList();
     }
 
-    private ItemDto getRandomItem(List<ItemDto> itemDtos) {
-        return itemDtos.isEmpty() ? null : itemDtos.get(random.nextInt(itemDtos.size()));
-    }
-
-    private ItemDto getRandomlyExpensiveItem(List<ItemDto> shopItemDtos) {
-        return getRandomItem(getItemsByCost(shopItemDtos, gameSettings.getExpensiveItemCost()));
-    }
-
-    private ItemDto getRandomlyCheapItem(List<ItemDto> shopItemDtos) {
-        return getRandomItem(getItemsByCost(shopItemDtos, gameSettings.getCheapItemCost()));
-    }
-
     private Optional<ItemDto> getItemByCost(List<ItemDto> shopItemDtos, int cost) {
         return shopItemDtos.stream().filter(shopItemDto -> shopItemDto.getCost() == cost).findFirst();
-    }
-
-    private List<ItemDto> getItemsByCost(List<ItemDto> shopItemDtos, int cost) {
-        return shopItemDtos.stream().filter(shopItemDto -> shopItemDto.getCost() == cost).toList();
     }
 }
