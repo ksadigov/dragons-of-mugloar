@@ -3,6 +3,7 @@ package com.bigbank.mugloar.service.impl;
 import com.bigbank.mugloar.config.GameProps;
 import com.bigbank.mugloar.dto.GameStateDto;
 import com.bigbank.mugloar.dto.ItemDto;
+import com.bigbank.mugloar.mapper.TaskMapper;
 import com.bigbank.mugloar.model.Probability;
 import com.bigbank.mugloar.model.Task;
 import com.bigbank.mugloar.service.OptimizationService;
@@ -23,13 +24,13 @@ public class OptimizationServiceImpl implements OptimizationService {
 
     @Override
     public Task getOptimalTask(List<Task> tasks, boolean alertForReputation) {
-        calculateOptimalScore(tasks, alertForReputation);
-        List<Task> tasksWithBestScores = getTaskWithHighestOptimalScore(tasks);
-        return Collections.max(tasksWithBestScores, Comparator.comparing(Task::getReward));
+        var tasksWithEvaluationScores = generateTasksWithEvaluationScores(tasks, alertForReputation);
+        var tasksWithBestEvaluationScores = getTasksWithHighestEvaluationScore(tasksWithEvaluationScores);
+        return Collections.max(tasksWithBestEvaluationScores, Comparator.comparing(Task::getReward));
     }
 
     @Override
-    public List<ItemDto> chooseOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
+    public List<ItemDto> getOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
         List<ItemDto> bestItemDtos = new ArrayList<>();
         Optional<ItemDto> optionalHealingPotion = getItemByCost(shopItemDtos, gameSettings.getHealingPotionCost());
 
@@ -51,23 +52,34 @@ public class OptimizationServiceImpl implements OptimizationService {
         return bestItemDtos;
     }
 
-    private void calculateOptimalScore(List<Task> tasks, boolean alertForReputation) {
+    private List<Task> generateTasksWithEvaluationScores(List<Task> tasks, boolean alertForReputation) {
         int averageExpiresIn = getAverageExpiresIn(tasks);
         int averageProbabilityValue = getAverageProbabilityValue(tasks);
 
-        tasks.forEach(task -> {
-            var taskProbability = Probability.from(task.getProbability());
-            int scoreImprovement = 10 - taskProbability.getValue();
-            task.setEvaluationScore(task.getEvaluationScore() + scoreImprovement);
+        return tasks.stream().map(task -> {
+            int evaluationScore = calculateEvaluationScore(task, averageExpiresIn, averageProbabilityValue, alertForReputation);
+            return createNewTaskWithEvaluationScore(task, evaluationScore);
+        }).toList();
+    }
 
-            if (shouldIncreaseScoreBasedOnExpiresIn(taskProbability.getValue(), averageProbabilityValue, task.getExpiresIn(), averageExpiresIn)) {
-                task.setEvaluationScore(task.getEvaluationScore() + (task.getExpiresIn() - averageExpiresIn));
-            }
+    private Task createNewTaskWithEvaluationScore(Task originalTask, int evaluationScore) {
+        return TaskMapper.INSTANCE.toTaskWithEvaluationScore(originalTask, evaluationScore);
+    }
 
-            if (alertForReputation && task.getMessage().contains(NEGATIVE_REPUTATION_TASK_KEYWORD)) {
-                task.setEvaluationScore(0);
-            }
-        });
+    private int calculateEvaluationScore(Task task, int averageExpiresIn, int averageProbabilityValue, boolean alertForReputation) {
+        var taskProbability = Probability.from(task.getProbability());
+        int scoreImprovement = 10 - taskProbability.getValue();
+        int evaluationScore = task.getEvaluationScore() + scoreImprovement;
+
+        if (shouldIncreaseScoreBasedOnExpiresIn(taskProbability.getValue(), averageProbabilityValue, task.getExpiresIn(), averageExpiresIn)) {
+            evaluationScore += (task.getExpiresIn() - averageExpiresIn);
+        }
+
+        if (alertForReputation && task.getMessage().contains(NEGATIVE_REPUTATION_TASK_KEYWORD)) {
+            evaluationScore = 0;
+        }
+
+        return evaluationScore;
     }
 
     private boolean shouldIncreaseScoreBasedOnExpiresIn(int taskProbabilityValue, int averageProbabilityIndex, int expiresIn, int averageExpiresIn) {
@@ -93,7 +105,7 @@ public class OptimizationServiceImpl implements OptimizationService {
                 .orElse(0.0);
     }
 
-    private List<Task> getTaskWithHighestOptimalScore(List<Task> tasks) {
+    private List<Task> getTasksWithHighestEvaluationScore(List<Task> tasks) {
         return getTasksWithScoresOf(getHighestScores(tasks), tasks);
     }
 

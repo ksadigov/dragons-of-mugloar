@@ -10,6 +10,6 @@ public interface OptimizationService {
 
     Task getOptimalTask(List<Task> tasks, boolean alertForReputation);
 
-    List<ItemDto> chooseOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto);
+    List<ItemDto> getOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto);
 
 }

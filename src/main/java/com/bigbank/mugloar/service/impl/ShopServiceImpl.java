@@ -22,7 +22,7 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public void doShopping(GameStateDto gameStateDto) {
         var shopItems = getAllItems(gameStateDto.getGameId());
-        var optimalItems = optimizationService.chooseOptimalItems(shopItems, gameStateDto);
+        var optimalItems = optimizationService.getOptimalItems(shopItems, gameStateDto);
         optimalItems.forEach(shopItemDto -> buyItem(gameStateDto, shopItemDto));
     }
 

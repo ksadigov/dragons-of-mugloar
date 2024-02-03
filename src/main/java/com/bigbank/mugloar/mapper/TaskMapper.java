@@ -18,4 +18,13 @@ public abstract class TaskMapper {
     public abstract Task toTask(MessageDto messageDto);
 
     public abstract List<Task> toTaskList(List<MessageDto> messageDtos);
+
+    @Mapping(target = "taskId", source = "originalTask.taskId")
+    @Mapping(target = "message", source = "originalTask.message")
+    @Mapping(target = "reward", source = "originalTask.reward")
+    @Mapping(target = "expiresIn", source = "originalTask.expiresIn")
+    @Mapping(target = "encrypted", source = "originalTask.encrypted")
+    @Mapping(target = "probability", source = "originalTask.probability")
+    @Mapping(target = "evaluationScore", source = "evaluationScore")
+    public abstract Task toTaskWithEvaluationScore(Task originalTask, int evaluationScore);
 }
