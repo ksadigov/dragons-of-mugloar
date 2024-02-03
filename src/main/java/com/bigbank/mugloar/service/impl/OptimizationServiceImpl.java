@@ -31,25 +31,28 @@ public class OptimizationServiceImpl implements OptimizationService {
 
     @Override
     public List<ItemDto> getOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
-        List<ItemDto> bestItemDtos = new ArrayList<>();
-        Optional<ItemDto> optionalHealingPotion = getItemByCost(shopItemDtos, gameSettings.getHealingPotionCost());
+        List<ItemDto> bestItems = new ArrayList<>();
+        addHealingPotionIfNecessary(shopItemDtos, gameStateDto).ifPresent(bestItems::add);
+        addAdditionalItemBasedOnGold(shopItemDtos, gameStateDto).ifPresent(bestItems::add);
+        return bestItems;
+    }
 
-        if (optionalHealingPotion.isPresent()) {
-            ItemDto healingPotion = optionalHealingPotion.get();
-            if (gameStateDto.getLives() < gameSettings.getBaseLifeThreshold()) {
-                bestItemDtos.add(healingPotion);
-
-                int goldAfterHealingPotion = gameStateDto.getGold() - gameSettings.getHealingPotionCost();
-                if (goldAfterHealingPotion >= gameSettings.getCheapItemCost() && goldAfterHealingPotion < gameSettings.getExpensiveItemCost()) {
-                    bestItemDtos.add(getRandomlyCheapItem(shopItemDtos));
-                } else if (goldAfterHealingPotion >= gameSettings.getExpensiveItemCost()) {
-                    bestItemDtos.add(getRandomlyExpensiveItem(shopItemDtos));
-                }
-            } else if (gameStateDto.getGold() >= gameSettings.getExpensiveItemCost()) {
-                bestItemDtos.add(getRandomlyExpensiveItem(shopItemDtos));
-            }
+    private Optional<ItemDto> addHealingPotionIfNecessary(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
+        if (gameStateDto.getLives() < gameSettings.getBaseLifeThreshold()) {
+            return getItemByCost(shopItemDtos, gameSettings.getHealingPotionCost());
         }
-        return bestItemDtos;
+        return Optional.empty();
+    }
+
+    private Optional<ItemDto> addAdditionalItemBasedOnGold(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
+        int goldAfterPossiblePurchase = gameStateDto.getGold() - gameSettings.getHealingPotionCost();
+        if (goldAfterPossiblePurchase >= gameSettings.getCheapItemCost() &&
+                goldAfterPossiblePurchase < gameSettings.getExpensiveItemCost()) {
+            return Optional.of(getRandomlyCheapItem(shopItemDtos));
+        } else if (goldAfterPossiblePurchase >= gameSettings.getExpensiveItemCost()) {
+            return Optional.of(getRandomlyExpensiveItem(shopItemDtos));
+        }
+        return Optional.empty();
     }
 
     private List<Task> generateTasksWithEvaluationScores(List<Task> tasks, boolean alertForReputation) {
