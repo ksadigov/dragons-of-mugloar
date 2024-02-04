@@ -12,9 +12,9 @@ import org.mapstruct.factory.Mappers;
 public abstract class GameStateMapper {
     public static final GameStateMapper INSTANCE = Mappers.getMapper(GameStateMapper.class);
 
-    public abstract void toGameState(@MappingTarget GameStateDto gameStateDto, TaskResultDto taskResultDto);
+    public abstract GameStateDto toGameStateDto(TaskResultDto taskResultDto, String gameId);
 
-    public abstract void toGameState(@MappingTarget GameStateDto gameStateDto, PurchaseResultDto purchaseResultDto);
+    public abstract void toGameStateDto(@MappingTarget GameStateDto gameStateDto, PurchaseResultDto purchaseResultDto);
 
 
 }

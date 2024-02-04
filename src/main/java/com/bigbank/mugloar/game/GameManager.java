@@ -1,7 +1,11 @@
 package com.bigbank.mugloar.game;
 
 import com.bigbank.mugloar.config.GameProps;
-import com.bigbank.mugloar.service.*;
+import com.bigbank.mugloar.mapper.GameStateMapper;
+import com.bigbank.mugloar.service.GameService;
+import com.bigbank.mugloar.service.InvestigationService;
+import com.bigbank.mugloar.service.ShopService;
+import com.bigbank.mugloar.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +24,6 @@ public class GameManager {
     private final ShopService shopService;
     private final TaskService taskService;
     private final InvestigationService investigationService;
-    private final StatisticsService statisticsService;
     private final GameProps gameSettings;
 
     public void startGame(int gameNumber) {
@@ -33,7 +36,7 @@ public class GameManager {
             var tasks = taskService.getTasks(gameId);
             var optimalTask = taskService.chooseOptimalTask(tasks, reputationAlertFlag);
             var taskResultDto = taskService.solveTask(gameState, optimalTask);
-            statisticsService.updateGameStateStatsAfterTask(gameState, taskResultDto);
+            gameState = GameStateMapper.INSTANCE.toGameStateDto(taskResultDto, gameId);
             if (gameState.getLives() > 0) {
                 shopService.doShopping(gameState);
                 var reputationDto = investigationService.investigate(gameId);
