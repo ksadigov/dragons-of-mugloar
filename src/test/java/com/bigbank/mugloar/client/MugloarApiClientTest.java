@@ -3,8 +3,10 @@ package com.bigbank.mugloar.client;
 import com.bigbank.mugloar.dto.GameStateDto;
 import com.bigbank.mugloar.dto.MessageDto;
 import com.bigbank.mugloar.dto.ReputationDto;
+import com.bigbank.mugloar.dto.TaskResultDto;
 import com.bigbank.mugloar.exception.FailedGetAllMessagesException;
 import com.bigbank.mugloar.exception.FailedRunInvestigationException;
+import com.bigbank.mugloar.exception.FailedSolveTaskException;
 import com.bigbank.mugloar.exception.FailedStartNewGameException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
+import static com.bigbank.mugloar.client.MugloarApiClient.SOLVE_TASK_ENDPOINT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -123,6 +126,39 @@ class MugloarApiClientTest {
         assertThatThrownBy(() -> testObj.getAllMessages(gameId))
                 .isInstanceOf(FailedGetAllMessagesException.class)
                 .hasMessageContaining("Failed to get all messages for gameId=" + gameId);
+    }
+
+    @Test
+    void solveTask_ShouldReturnTaskResult() {
+        String gameId = "gameId";
+        String taskId = "taskId";
+        TaskResultDto expectedTaskResult = new TaskResultDto(true, 3, 100, 63, 0, 5, "message");
+        when(restTemplate.exchange(
+                eq(UriComponentsBuilder.fromPath(SOLVE_TASK_ENDPOINT).buildAndExpand(gameId, taskId).toString()),
+                eq(HttpMethod.POST),
+                any(),
+                eq(TaskResultDto.class))
+        ).thenReturn(new ResponseEntity<>(expectedTaskResult, HttpStatus.OK));
+
+        TaskResultDto actualTaskResult = testObj.solveTask(gameId, taskId);
+
+        assertThat(actualTaskResult).isNotNull().isEqualTo(expectedTaskResult);
+    }
+
+    @Test
+    void solveTask_WhenError_ShouldThrowFailedSolveTaskException() {
+        String gameId = "gameId";
+        String taskId = "taskId";
+        when(restTemplate.exchange(
+                eq(UriComponentsBuilder.fromPath(SOLVE_TASK_ENDPOINT).buildAndExpand(gameId, taskId).toString()),
+                eq(HttpMethod.POST),
+                any(),
+                eq(TaskResultDto.class))
+        ).thenThrow(new RuntimeException("Connection error"));
+
+        assertThatThrownBy(() -> testObj.solveTask(gameId, taskId))
+                .isInstanceOf(FailedSolveTaskException.class)
+                .hasMessageContaining("Failed to solve taskId=" + taskId + " for gameId= " + gameId);
     }
 }
 
