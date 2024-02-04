@@ -1,7 +1,9 @@
 package com.bigbank.mugloar.client;
 
 import com.bigbank.mugloar.dto.GameStateDto;
+import com.bigbank.mugloar.dto.MessageDto;
 import com.bigbank.mugloar.dto.ReputationDto;
+import com.bigbank.mugloar.exception.FailedGetAllMessagesException;
 import com.bigbank.mugloar.exception.FailedRunInvestigationException;
 import com.bigbank.mugloar.exception.FailedStartNewGameException;
 import org.junit.jupiter.api.Test;
@@ -9,15 +11,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,7 +53,7 @@ class MugloarApiClientTest {
     void startNewGame_WhenError_ShouldThrowFailedStartNewGameException() {
         when(restTemplate.exchange(
                 eq(MugloarApiClient.START_NEW_GAME_ENDPOINT),
-                eq(org.springframework.http.HttpMethod.POST),
+                eq(HttpMethod.POST),
                 any(),
                 eq(GameStateDto.class))
         ).thenThrow(new RuntimeException("Connection error"));
@@ -64,7 +69,7 @@ class MugloarApiClientTest {
         ReputationDto expectedDto = new ReputationDto(0, 0, 0);
         when(restTemplate.exchange(
                 eq(UriComponentsBuilder.fromPath(MugloarApiClient.RUN_INVESTIGATION_ENDPOINT).buildAndExpand(gameId).toString()),
-                eq(org.springframework.http.HttpMethod.POST),
+                eq(HttpMethod.POST),
                 any(),
                 eq(ReputationDto.class))
         ).thenReturn(ResponseEntity.ok(expectedDto));
@@ -79,7 +84,7 @@ class MugloarApiClientTest {
         String gameId = "gameId";
         when(restTemplate.exchange(
                 eq(UriComponentsBuilder.fromPath(MugloarApiClient.RUN_INVESTIGATION_ENDPOINT).buildAndExpand(gameId).toString()),
-                eq(org.springframework.http.HttpMethod.POST),
+                eq(HttpMethod.POST),
                 any(),
                 eq(ReputationDto.class))
         ).thenThrow(new RuntimeException("Connection error"));
@@ -87,6 +92,37 @@ class MugloarApiClientTest {
         assertThatThrownBy(() -> testObj.runInvestigation(gameId))
                 .isInstanceOf(FailedRunInvestigationException.class)
                 .hasMessageContaining("Failed to get reputation for gameId=" + gameId);
+    }
+
+    @Test
+    void getAllMessages_ShouldReturnListOfMessages() {
+        String gameId = "gameId";
+        List<MessageDto> expectedMessages = List.of(new MessageDto("QwWnKPr2", "description", 10, 5, null, "Piece of cake"));
+        when(restTemplate.exchange(
+                anyString(),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class))
+        ).thenReturn(new ResponseEntity<>(expectedMessages, HttpStatus.OK));
+
+        List<MessageDto> actualMessages = testObj.getAllMessages(gameId);
+
+        assertThat(actualMessages).isNotNull().isEqualTo(expectedMessages);
+    }
+
+    @Test
+    void getAllMessages_WhenError_ShouldThrowFailedGetAllMessagesException() {
+        String gameId = "gameId";
+        when(restTemplate.exchange(
+                anyString(),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class))
+        ).thenThrow(new RuntimeException("Connection error"));
+
+        assertThatThrownBy(() -> testObj.getAllMessages(gameId))
+                .isInstanceOf(FailedGetAllMessagesException.class)
+                .hasMessageContaining("Failed to get all messages for gameId=" + gameId);
     }
 }
 
