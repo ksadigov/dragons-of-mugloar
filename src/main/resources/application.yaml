@@ -1,0 +1,19 @@
+app:
+  rest-template:
+    timeout: 5000
+    maxConnectionsPerRoute: 100
+    maxPoolSize: 200
+    keepalive: 30
+  mugloar-client-configuration:
+    host: https://dragonsofmugloar.com/api/v2/
+    readTimeout: 1000
+    connectionTimeout: 1000
+  game-settings:
+    retryLimit: 100
+    healingPotionCost: 50
+    cheapItemCost: 100
+    expensiveItemCost: 300
+    reputationMaxLimit: -5
+    finalScoreThreshold: 1000
+    baseLifeThreshold: 2
+
