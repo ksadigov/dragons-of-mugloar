@@ -12,5 +12,5 @@ public interface TaskService {
 
     TaskResultDto solveTask(GameStateDto gameStateDto, Task task);
 
-    Task chooseOptimalTask(List<Task> taskList, boolean alertForReputation);
+    Task chooseOptimalTask(List<Task> taskList, boolean reputationAlertFlag);
 }
