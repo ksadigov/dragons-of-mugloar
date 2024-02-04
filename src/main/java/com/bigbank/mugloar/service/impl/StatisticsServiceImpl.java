@@ -1,9 +1,6 @@
 package com.bigbank.mugloar.service.impl;
 
 import com.bigbank.mugloar.config.GameProps;
-import com.bigbank.mugloar.dto.GameStateDto;
-import com.bigbank.mugloar.dto.PurchaseResultDto;
-import com.bigbank.mugloar.mapper.GameStateMapper;
 import com.bigbank.mugloar.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +14,6 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
     private final GameProps gameSettings;
-
-    @Override
-    public void updateGameStateStatsAfterShopping(GameStateDto gameStateDto, PurchaseResultDto purchaseResultDto) {
-        GameStateMapper.INSTANCE.toGameStateDto(gameStateDto, purchaseResultDto);
-    }
 
     @Override
     public void printGameStats(List<Integer> gameScores) {

@@ -38,7 +38,7 @@ public class GameManager {
             var taskResultDto = taskService.solveTask(gameState, optimalTask);
             gameState = GameStateMapper.INSTANCE.toGameStateDto(taskResultDto, gameId);
             if (gameState.getLives() > 0) {
-                shopService.doShopping(gameState);
+                gameState = shopService.doShopping(gameState);
                 var reputationDto = investigationService.investigate(gameId);
                 if (reputationDto.getState() < gameSettings.getReputationMaxLimit()) {
                     reputationAlertFlag = true;

@@ -4,5 +4,5 @@ import com.bigbank.mugloar.dto.GameStateDto;
 
 public interface ShopService {
 
-    void doShopping(GameStateDto gameStateDto);
+    GameStateDto doShopping(GameStateDto gameStateDto);
 }

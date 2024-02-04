@@ -4,9 +4,9 @@ import com.bigbank.mugloar.client.MugloarApiClient;
 import com.bigbank.mugloar.dto.GameStateDto;
 import com.bigbank.mugloar.dto.ItemDto;
 import com.bigbank.mugloar.dto.PurchaseResultDto;
+import com.bigbank.mugloar.mapper.GameStateMapper;
 import com.bigbank.mugloar.service.OptimizationService;
 import com.bigbank.mugloar.service.ShopService;
-import com.bigbank.mugloar.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +16,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ShopServiceImpl implements ShopService {
     private final MugloarApiClient mugloarApiClient;
-    private final StatisticsService statisticsService;
     private final OptimizationService optimizationService;
 
     @Override
-    public void doShopping(GameStateDto gameStateDto) {
-        List<ItemDto> shopItems = getAllItems(gameStateDto.getGameId());
-        List<ItemDto> optimalItems = optimizationService.getOptimalItems(shopItems, gameStateDto);
-        optimalItems.forEach(item -> attemptToPurchaseItem(gameStateDto, item));
+    public GameStateDto doShopping(GameStateDto initialGameStateDto) {
+        List<ItemDto> shopItems = getAllItems(initialGameStateDto.getGameId());
+        List<ItemDto> optimalItems = optimizationService.getOptimalItems(shopItems, initialGameStateDto);
+
+        return optimalItems.stream()
+                .reduce(initialGameStateDto, this::attemptToPurchaseItem,
+                        (state1, state2) -> state2);
     }
 
     private List<ItemDto> getAllItems(String gameId) {
@@ -34,10 +36,11 @@ public class ShopServiceImpl implements ShopService {
         return mugloarApiClient.purchaseItem(gameId, itemId);
     }
 
-    private void attemptToPurchaseItem(GameStateDto gameStateDto, ItemDto shopItemDto) {
+    private GameStateDto attemptToPurchaseItem(GameStateDto gameStateDto, ItemDto shopItemDto) {
         PurchaseResultDto purchaseResultDto = purchaseItem(gameStateDto.getGameId(), shopItemDto.getId());
         if (purchaseResultDto.isShoppingSuccess()) {
-            statisticsService.updateGameStateStatsAfterShopping(gameStateDto, purchaseResultDto);
+            return GameStateMapper.INSTANCE.toGameStateDto(gameStateDto, purchaseResultDto);
         }
+        return gameStateDto;
     }
 }
