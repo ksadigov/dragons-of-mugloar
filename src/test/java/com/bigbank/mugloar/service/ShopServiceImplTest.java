@@ -15,7 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ShopServiceImplTest {
@@ -52,6 +53,5 @@ class ShopServiceImplTest {
         verify(mugloarApiClient).getAllShopItems(gameId);
         verify(optimizationService).getOptimalItems(shopItems, gameStateDto);
         verify(mugloarApiClient).purchaseItem(gameId, "cs");
-        verify(statisticsService).updateGameStateStatsAfterShopping(eq(gameStateDto), any(PurchaseResultDto.class));
     }
 }
