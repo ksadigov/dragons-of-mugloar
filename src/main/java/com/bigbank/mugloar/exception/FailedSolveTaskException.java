@@ -6,7 +6,4 @@ public class FailedSolveTaskException extends RuntimeException {
         super(message, cause);
     }
 
-    public FailedSolveTaskException(String message) {
-        super(message);
-    }
 }

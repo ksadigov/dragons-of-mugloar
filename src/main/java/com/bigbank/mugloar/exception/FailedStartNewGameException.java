@@ -6,7 +6,4 @@ public class FailedStartNewGameException extends RuntimeException {
         super(message, cause);
     }
 
-    public FailedStartNewGameException(String message) {
-        super(message);
-    }
 }

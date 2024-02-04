@@ -6,7 +6,4 @@ public class FailedPurchaseItemException extends RuntimeException {
         super(message, cause);
     }
 
-    public FailedPurchaseItemException(String message) {
-        super(message);
-    }
 }

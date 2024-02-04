@@ -6,7 +6,4 @@ public class FailedGetAllShopItemsException extends RuntimeException {
         super(message, cause);
     }
 
-    public FailedGetAllShopItemsException(String message) {
-        super(message);
-    }
 }

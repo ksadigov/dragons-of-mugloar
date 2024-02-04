@@ -6,7 +6,4 @@ public class FailedRunInvestigationException extends RuntimeException {
         super(message, cause);
     }
 
-    public FailedRunInvestigationException(String message) {
-        super(message);
-    }
 }

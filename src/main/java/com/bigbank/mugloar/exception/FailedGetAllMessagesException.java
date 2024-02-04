@@ -6,7 +6,4 @@ public class FailedGetAllMessagesException extends RuntimeException {
         super(message, cause);
     }
 
-    public FailedGetAllMessagesException(String message) {
-        super(message);
-    }
 }
