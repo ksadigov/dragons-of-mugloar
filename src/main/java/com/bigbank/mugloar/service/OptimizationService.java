@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface OptimizationService {
 
-    Task getOptimalTask(List<Task> tasks, boolean alertForReputation);
+    Task getOptimalTask(List<Task> tasks, boolean reputationAlertFlag);
 
     List<ItemDto> getOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto);
 
