@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageDecryptor {
@@ -16,14 +17,11 @@ public class MessageDecryptor {
     }
 
     private static MessageDto decryptMessageIfNeeded(MessageDto messageDto) {
-        if (messageDto.getEncrypted() == null) return messageDto;
-
-        MessageDto decryptedMessageDto = new MessageDto();
-
-        switch (messageDto.getEncrypted()) {
-            case 1 -> MessageMapper.INSTANCE.decodedWithBase64(decryptedMessageDto, messageDto);
-            case 2 -> MessageMapper.INSTANCE.decodedWithRot13(decryptedMessageDto, messageDto);
-        }
-        return decryptedMessageDto;
+        return Optional.ofNullable(messageDto.getEncrypted())
+                .map(encrypted -> switch (encrypted) {
+                    case 1 -> MessageMapper.INSTANCE.decodedWithBase64(messageDto);
+                    case 2 -> MessageMapper.INSTANCE.decodedWithRot13(messageDto);
+                    default -> messageDto;
+                }).orElse(messageDto);
     }
 }
