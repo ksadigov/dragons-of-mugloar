@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.bigbank.mugloar.util.Constants.GAME_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,13 +25,12 @@ class InvestigationServiceImplTest {
 
     @Test
     void investigate_ShouldCallApiClientAndReturnReputation() {
-        String gameId = "gameId";
         ReputationDto expectedReputation = new ReputationDto(0.0, 0.0, 0.0);
-        when(mugloarApiClient.runInvestigation(gameId)).thenReturn(expectedReputation);
+        when(mugloarApiClient.runInvestigation(GAME_ID)).thenReturn(expectedReputation);
 
-        ReputationDto actualReputation = testObj.investigate(gameId);
+        ReputationDto actualReputation = testObj.investigate(GAME_ID);
 
-        verify(mugloarApiClient).runInvestigation(gameId);
+        verify(mugloarApiClient).runInvestigation(GAME_ID);
         assertThat(actualReputation).isNotNull().isEqualTo(expectedReputation);
     }
 

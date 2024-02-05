@@ -8,6 +8,7 @@ import com.bigbank.mugloar.service.impl.StatisticsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
@@ -23,17 +24,13 @@ class StatisticsServiceImplTest {
     @Mock
     private GameProps gameSettings;
 
-    private StatisticsServiceImpl statisticsService;
+    @InjectMocks
+    private StatisticsServiceImpl testObj;
 
     private ListAppender<ILoggingEvent> listAppender;
 
     @BeforeEach
     void setUp() {
-        when(gameSettings.getFinalScoreThreshold()).thenReturn(1000);
-        when(gameSettings.getRetryLimit()).thenReturn(10);
-
-        statisticsService = new StatisticsServiceImpl(gameSettings);
-
         Logger statisticsLogger = (Logger) LoggerFactory.getLogger(StatisticsServiceImpl.class);
         listAppender = new ListAppender<>();
         listAppender.start();
@@ -42,11 +39,22 @@ class StatisticsServiceImplTest {
 
     @Test
     void printGameStats_ShouldLogCorrectStatistics() {
-        List<Integer> gameScores = List.of(950, 1200, 1800, 2000, 1001, 1070, 1111, 1320, 1500, 1023);
+        when(gameSettings.getFinalScoreThreshold()).thenReturn(1000);
+        when(gameSettings.getRetryLimit()).thenReturn(10);
 
-        when(statisticsService.getGameScores()).thenReturn(gameScores);
+        testObj.getGameScores().clear();
+        testObj.addGameScore(950);
+        testObj.addGameScore(1200);
+        testObj.addGameScore(1800);
+        testObj.addGameScore(2000);
+        testObj.addGameScore(1001);
+        testObj.addGameScore(1070);
+        testObj.addGameScore(1111);
+        testObj.addGameScore(1320);
+        testObj.addGameScore(1500);
+        testObj.addGameScore(1023);
 
-        statisticsService.printGameStats();
+        testObj.printGameStats();
 
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage)
@@ -56,5 +64,15 @@ class StatisticsServiceImplTest {
                         "Min Score: 950",
                         "Max Score: 2000",
                         "Success Rate: 90.00%");
+    }
+
+    @Test
+    void addGameScore_ShouldAddScoreToList() {
+        int score = 75;
+
+        testObj.addGameScore(score);
+
+        List<Integer> gameScores = testObj.getGameScores();
+        assertThat(gameScores).hasSize(1).contains(score);
     }
 }

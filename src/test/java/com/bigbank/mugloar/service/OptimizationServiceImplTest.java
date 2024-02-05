@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static com.bigbank.mugloar.util.Constants.GAME_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +49,7 @@ class OptimizationServiceImplTest {
         int cheapItemCost = 30;
         int expensiveItemCost = 100;
 
-        var gameStateDto = new GameStateDto("gameId", 1, 99, 2, 200, 0, 50);
+        var gameStateDto = new GameStateDto(GAME_ID, 1, 99, 2, 200, 0, 50);
         List<ItemDto> shopItems = List.of(
                 new ItemDto("hpot", "Healing Potion", 50),
                 new ItemDto("cs", "Claw Sharpening", 100),

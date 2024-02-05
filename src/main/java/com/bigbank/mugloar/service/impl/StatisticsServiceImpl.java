@@ -39,6 +39,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     public List<Integer> getGameScores() {
-        return Collections.unmodifiableList(GAME_SCORES);
+        return GAME_SCORES;
     }
 }
