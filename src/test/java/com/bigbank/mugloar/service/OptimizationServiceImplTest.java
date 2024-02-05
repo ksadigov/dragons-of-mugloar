@@ -36,7 +36,7 @@ class OptimizationServiceImplTest {
                 Task.builder().taskId("3").message("message")
                         .reward(16).expiresIn(3).encrypted(null).probability("Piece of cake").build());
 
-        Task optimalTask = testObj.getOptimalTask(tasks, reputationAlertFlag);
+        Task optimalTask = testObj.findOptimalTask(tasks, reputationAlertFlag);
 
         assertThat(optimalTask.getTaskId()).isEqualTo("3");
     }
@@ -61,7 +61,7 @@ class OptimizationServiceImplTest {
         when(gameSettings.getCheapItemCost()).thenReturn(cheapItemCost);
         when(gameSettings.getExpensiveItemCost()).thenReturn(expensiveItemCost);
 
-        List<ItemDto> optimalItems = testObj.getOptimalItems(shopItems, gameStateDto);
+        List<ItemDto> optimalItems = testObj.findOptimalItems(shopItems, gameStateDto);
 
         assertThat(optimalItems).hasSize(1).extracting("id").contains("hpot");
     }

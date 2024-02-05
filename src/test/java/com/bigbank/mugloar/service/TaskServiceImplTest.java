@@ -88,11 +88,11 @@ class TaskServiceImplTest {
         boolean reputationAlertFlag = false;
         List<Task> tasks = List.of(generateMockTask());
         Task expectedTask = tasks.get(0);
-        when(optimizationService.getOptimalTask(tasks, reputationAlertFlag)).thenReturn(expectedTask);
+        when(optimizationService.findOptimalTask(tasks, reputationAlertFlag)).thenReturn(expectedTask);
 
         Task optimalTask = testObj.chooseOptimalTask(tasks, reputationAlertFlag);
 
-        verify(optimizationService).getOptimalTask(tasks, reputationAlertFlag);
+        verify(optimizationService).findOptimalTask(tasks, reputationAlertFlag);
         assertThat(optimalTask).isNotNull().isEqualTo(expectedTask);
     }
 

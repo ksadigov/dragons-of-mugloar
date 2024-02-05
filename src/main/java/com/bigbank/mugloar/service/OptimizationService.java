@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface OptimizationService {
 
-    Task getOptimalTask(List<Task> tasks, boolean reputationAlertFlag);
+    Task findOptimalTask(List<Task> tasks, boolean reputationAlertFlag);
 
-    List<ItemDto> getOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto);
+    List<ItemDto> findOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto);
 
 }

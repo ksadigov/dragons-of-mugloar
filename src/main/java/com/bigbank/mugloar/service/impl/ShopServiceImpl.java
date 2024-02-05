@@ -21,7 +21,7 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public GameStateDto doShopping(GameStateDto initialGameStateDto) {
         List<ItemDto> shopItems = getAllItems(initialGameStateDto.getGameId());
-        List<ItemDto> optimalItems = optimizationService.getOptimalItems(shopItems, initialGameStateDto);
+        List<ItemDto> optimalItems = optimizationService.findOptimalItems(shopItems, initialGameStateDto);
 
         return optimalItems.stream()
                 .reduce(initialGameStateDto, this::attemptToPurchaseItem,

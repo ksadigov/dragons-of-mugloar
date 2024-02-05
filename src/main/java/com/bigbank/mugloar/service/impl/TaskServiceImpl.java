@@ -33,6 +33,6 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task chooseOptimalTask(List<Task> tasks, boolean reputationAlertFlag) {
-        return optimizationService.getOptimalTask(tasks, reputationAlertFlag);
+        return optimizationService.findOptimalTask(tasks, reputationAlertFlag);
     }
 }

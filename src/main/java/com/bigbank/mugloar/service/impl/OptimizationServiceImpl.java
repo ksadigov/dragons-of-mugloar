@@ -13,29 +13,30 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static com.bigbank.mugloar.constant.Constants.NEGATIVE_REPUTATION_TASK_KEYWORD;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OptimizationServiceImpl implements OptimizationService {
-    private static final String NEGATIVE_REPUTATION_TASK_KEYWORD = "Steal";
     private static final Random random = new Random();
 
     private final GameProps gameSettings;
 
     @Override
-    public Task getOptimalTask(List<Task> tasks, boolean reputationAlertFlag) {
+    public Task findOptimalTask(List<Task> tasks, boolean reputationAlertFlag) {
         var tasksWithEvaluationScores = generateTasksWithEvaluationScores(tasks, reputationAlertFlag);
-        var tasksWithBestEvaluationScores = getTasksWithHighestEvaluationScore(tasksWithEvaluationScores);
-        return Collections.max(tasksWithBestEvaluationScores, Comparator.comparing(Task::getReward));
+        var tasksWithMaxEvaluationScores = findTasksWithMaxEvaluationScore(tasksWithEvaluationScores);
+        return Collections.max(tasksWithMaxEvaluationScores, Comparator.comparing(Task::getReward));
     }
 
     @Override
-    public List<ItemDto> getOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
+    public List<ItemDto> findOptimalItems(List<ItemDto> shopItemDtos, GameStateDto gameStateDto) {
         List<ItemDto> optimalItems = new ArrayList<>();
 
         findAndAddHealingPotionIfRequired(shopItemDtos, gameStateDto, gameSettings.getHealingPotionCost(), gameSettings.getBaseLifeThreshold())
                 .ifPresent(optimalItems::add);
-        selectItemWithinBudget(shopItemDtos, gameStateDto.getGold() - gameSettings.getHealingPotionCost())
+        findAndAddItemWithinBudget(shopItemDtos, gameStateDto.getGold() - gameSettings.getHealingPotionCost())
                 .ifPresent(optimalItems::add);
         return optimalItems;
     }
@@ -47,7 +48,7 @@ public class OptimizationServiceImpl implements OptimizationService {
         return Optional.empty();
     }
 
-    private Optional<ItemDto> selectItemWithinBudget(List<ItemDto> shopItemDtos, int remainingGold) {
+    private Optional<ItemDto> findAndAddItemWithinBudget(List<ItemDto> shopItemDtos, int remainingGold) {
         if (remainingGold >= gameSettings.getCheapItemCost() && remainingGold < gameSettings.getExpensiveItemCost()) {
             return Optional.ofNullable(getRandomItemByCostRange(shopItemDtos, gameSettings.getCheapItemCost()));
         } else if (remainingGold >= gameSettings.getExpensiveItemCost()) {
@@ -64,16 +65,16 @@ public class OptimizationServiceImpl implements OptimizationService {
     }
 
     private List<Task> generateTasksWithEvaluationScores(List<Task> tasks, boolean reputationAlertFlag) {
-        int averageExpiresIn = getAverageExpiresIn(tasks);
-        int averageProbabilityValue = getAverageProbabilityValue(tasks);
+        int averageExpiresIn = calculateAverageExpiresIn(tasks);
+        int averageProbabilityValue = calculateAverageProbabilityValue(tasks);
 
         return tasks.stream().map(task -> {
             int evaluationScore = calculateEvaluationScore(task, averageExpiresIn, averageProbabilityValue, reputationAlertFlag);
-            return createNewTaskWithEvaluationScore(task, evaluationScore);
+            return createTaskWithEvaluationScore(task, evaluationScore);
         }).toList();
     }
 
-    private Task createNewTaskWithEvaluationScore(Task originalTask, int evaluationScore) {
+    private Task createTaskWithEvaluationScore(Task originalTask, int evaluationScore) {
         return TaskMapper.INSTANCE.toTaskWithEvaluationScore(originalTask, evaluationScore);
     }
 
@@ -82,7 +83,7 @@ public class OptimizationServiceImpl implements OptimizationService {
         int scoreImprovement = 10 - taskProbability.getValue();
         int evaluationScore = task.getEvaluationScore() + scoreImprovement;
 
-        if (shouldIncreaseScoreBasedOnExpiresIn(taskProbability.getValue(), averageProbabilityValue, task.getExpiresIn(), averageExpiresIn)) {
+        if (isEligibleForScoreBoost(taskProbability.getValue(), averageProbabilityValue, task.getExpiresIn(), averageExpiresIn)) {
             evaluationScore += (task.getExpiresIn() - averageExpiresIn);
         }
 
@@ -93,34 +94,34 @@ public class OptimizationServiceImpl implements OptimizationService {
         return evaluationScore;
     }
 
-    private boolean shouldIncreaseScoreBasedOnExpiresIn(int taskProbabilityValue, int averageProbabilityIndex, int expiresIn, int averageExpiresIn) {
+    private boolean isEligibleForScoreBoost(int taskProbabilityValue, int averageProbabilityIndex, int expiresIn, int averageExpiresIn) {
         return taskProbabilityValue <= averageProbabilityIndex && expiresIn >= averageExpiresIn;
     }
 
-    private int getAverageExpiresIn(List<Task> tasks) {
+    private int calculateAverageExpiresIn(List<Task> tasks) {
         if (tasks.isEmpty()) {
             return 0;
         }
         return (int) tasks.stream()
                 .mapToInt(Task::getExpiresIn)
                 .average()
-                .orElse(0.0);
+                .orElse(0);
     }
 
-    private int getAverageProbabilityValue(List<Task> tasks) {
+    private int calculateAverageProbabilityValue(List<Task> tasks) {
         return (int) tasks.stream()
                 .map(Task::getProbability)
                 .map(Probability::from)
                 .mapToInt(Probability::getValue)
                 .average()
-                .orElse(0.0);
+                .orElse(0);
     }
 
-    private List<Task> getTasksWithHighestEvaluationScore(List<Task> tasks) {
-        return filterTasksByEvaluationScoreEqualTo(getHighestEvaluationScore(tasks), tasks);
+    private List<Task> findTasksWithMaxEvaluationScore(List<Task> tasks) {
+        return filterTasksWithMaxEvaluationScore(findMaxEvaluationScore(tasks), tasks);
     }
 
-    private int getHighestEvaluationScore(List<Task> tasks) {
+    private int findMaxEvaluationScore(List<Task> tasks) {
         return tasks
                 .stream()
                 .map(Task::getEvaluationScore)
@@ -129,7 +130,7 @@ public class OptimizationServiceImpl implements OptimizationService {
                 .orElseThrow(NoSuchElementException::new);
     }
 
-    private List<Task> filterTasksByEvaluationScoreEqualTo(int maxPoint, List<Task> tasks) {
+    private List<Task> filterTasksWithMaxEvaluationScore(int maxPoint, List<Task> tasks) {
         return tasks.stream().filter(task -> task.getEvaluationScore() == (maxPoint)).toList();
     }
 

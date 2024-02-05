@@ -43,7 +43,7 @@ class ShopServiceImplTest {
         when(mugloarApiClient.getAllShopItems(gameId)).thenReturn(shopItems);
 
         List<ItemDto> optimalItems = List.of(shopItems.get(1));
-        when(optimizationService.getOptimalItems(shopItems, gameStateDto)).thenReturn(optimalItems);
+        when(optimizationService.findOptimalItems(shopItems, gameStateDto)).thenReturn(optimalItems);
 
         PurchaseResultDto purchaseResultDto = new PurchaseResultDto(true, 1, 3, 1, 1);
         when(mugloarApiClient.purchaseItem(anyString(), anyString())).thenReturn(purchaseResultDto);
@@ -51,7 +51,7 @@ class ShopServiceImplTest {
         testObj.doShopping(gameStateDto);
 
         verify(mugloarApiClient).getAllShopItems(gameId);
-        verify(optimizationService).getOptimalItems(shopItems, gameStateDto);
+        verify(optimizationService).findOptimalItems(shopItems, gameStateDto);
         verify(mugloarApiClient).purchaseItem(gameId, "cs");
     }
 }
