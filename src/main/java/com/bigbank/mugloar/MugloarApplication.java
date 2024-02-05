@@ -46,7 +46,7 @@ public class MugloarApplication implements CommandLineRunner {
         boolean finished = executor.awaitTermination(1, TimeUnit.HOURS);
 
         if (finished) {
-            statisticsService.printGameStats(gameManager.getGameScores());
+            statisticsService.printGameStats();
         } else {
             log.error("The games did not finish within the expected time.");
         }

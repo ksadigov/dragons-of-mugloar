@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,7 +64,5 @@ class GameManagerTest {
         verify(taskService, atLeastOnce()).solveTask(any(GameStateDto.class), any(Task.class));
         verify(shopService, atLeastOnce()).doShopping(any(GameStateDto.class));
         verify(investigationService, atLeastOnce()).investigate(anyString());
-
-        assertThat(testObj.getGameScores()).isNotEmpty();
     }
 }

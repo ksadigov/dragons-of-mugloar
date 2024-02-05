@@ -44,7 +44,9 @@ class StatisticsServiceImplTest {
     void printGameStats_ShouldLogCorrectStatistics() {
         List<Integer> gameScores = List.of(950, 1200, 1800, 2000, 1001, 1070, 1111, 1320, 1500, 1023);
 
-        statisticsService.printGameStats(gameScores);
+        when(statisticsService.getGameScores()).thenReturn(gameScores);
+
+        statisticsService.printGameStats();
 
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage)
