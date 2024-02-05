@@ -2,6 +2,7 @@ package com.bigbank.mugloar.client;
 
 import com.bigbank.mugloar.dto.*;
 import com.bigbank.mugloar.exception.*;
+import com.bigbank.mugloar.model.Probability;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 
 import static com.bigbank.mugloar.client.MugloarApiClient.*;
+import static com.bigbank.mugloar.util.Constants.GAME_ID;
+import static com.bigbank.mugloar.util.Constants.TASK_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -33,7 +36,7 @@ class MugloarApiClientTest {
 
     @Test
     void startNewGame_ShouldReturnGameStateDto() {
-        GameStateDto expectedDto = new GameStateDto("gameId", 3, 0, 0, 0, 0, 0);
+        GameStateDto expectedDto = new GameStateDto(GAME_ID, 3, 0, 0, 0, 0, 0);
         when(restTemplate.exchange(
                 eq(MugloarApiClient.START_NEW_GAME_ENDPOINT),
                 eq(HttpMethod.POST),
@@ -62,39 +65,36 @@ class MugloarApiClientTest {
 
     @Test
     void runInvestigation_ShouldReturnReputationDto() {
-        String gameId = "gameId";
         ReputationDto expectedDto = new ReputationDto(0, 0, 0);
         when(restTemplate.exchange(
-                eq(UriComponentsBuilder.fromPath(MugloarApiClient.RUN_INVESTIGATION_ENDPOINT).buildAndExpand(gameId).toString()),
+                eq(UriComponentsBuilder.fromPath(MugloarApiClient.RUN_INVESTIGATION_ENDPOINT).buildAndExpand(GAME_ID).toString()),
                 eq(HttpMethod.POST),
                 any(),
                 eq(ReputationDto.class))
         ).thenReturn(ResponseEntity.ok(expectedDto));
 
-        ReputationDto actualDto = testObj.runInvestigation(gameId);
+        ReputationDto actualDto = testObj.runInvestigation(GAME_ID);
 
         assertThat(actualDto).isNotNull().isEqualTo(expectedDto);
     }
 
     @Test
     void runInvestigation_WhenError_ShouldThrowFailedRunInvestigationException() {
-        String gameId = "gameId";
         when(restTemplate.exchange(
-                eq(UriComponentsBuilder.fromPath(MugloarApiClient.RUN_INVESTIGATION_ENDPOINT).buildAndExpand(gameId).toString()),
+                eq(UriComponentsBuilder.fromPath(MugloarApiClient.RUN_INVESTIGATION_ENDPOINT).buildAndExpand(GAME_ID).toString()),
                 eq(HttpMethod.POST),
                 any(),
                 eq(ReputationDto.class))
         ).thenThrow(new RuntimeException("Connection error"));
 
-        assertThatThrownBy(() -> testObj.runInvestigation(gameId))
+        assertThatThrownBy(() -> testObj.runInvestigation(GAME_ID))
                 .isInstanceOf(FailedRunInvestigationException.class)
-                .hasMessageContaining("Failed to get reputation for gameId=" + gameId);
+                .hasMessageContaining("Failed to get reputation for gameId=" + GAME_ID);
     }
 
     @Test
     void getAllMessages_ShouldReturnListOfMessages() {
-        String gameId = "gameId";
-        List<MessageDto> expectedMessages = List.of(new MessageDto("QwWnKPr2", "description", 10, 5, null, "Piece of cake"));
+        List<MessageDto> expectedMessages = List.of(new MessageDto(TASK_ID, "description", 10, 5, null, Probability.PIECE_OF_CAKE.getMessage()));
         when(restTemplate.exchange(
                 anyString(),
                 eq(HttpMethod.GET),
@@ -102,14 +102,13 @@ class MugloarApiClientTest {
                 any(ParameterizedTypeReference.class))
         ).thenReturn(new ResponseEntity<>(expectedMessages, HttpStatus.OK));
 
-        List<MessageDto> actualMessages = testObj.getAllMessages(gameId);
+        List<MessageDto> actualMessages = testObj.getAllMessages(GAME_ID);
 
         assertThat(actualMessages).isNotNull().isEqualTo(expectedMessages);
     }
 
     @Test
     void getAllMessages_WhenError_ShouldThrowFailedGetAllMessagesException() {
-        String gameId = "gameId";
         when(restTemplate.exchange(
                 anyString(),
                 eq(HttpMethod.GET),
@@ -117,108 +116,98 @@ class MugloarApiClientTest {
                 any(ParameterizedTypeReference.class))
         ).thenThrow(new RuntimeException("Connection error"));
 
-        assertThatThrownBy(() -> testObj.getAllMessages(gameId))
+        assertThatThrownBy(() -> testObj.getAllMessages(GAME_ID))
                 .isInstanceOf(FailedGetAllMessagesException.class)
-                .hasMessageContaining("Failed to get all messages for gameId=" + gameId);
+                .hasMessageContaining("Failed to get all messages for gameId=" + GAME_ID);
     }
 
     @Test
     void solveTask_ShouldReturnTaskResult() {
-        String gameId = "gameId";
-        String taskId = "taskId";
         TaskResultDto expectedTaskResult = new TaskResultDto(true, 3, 100, 63, 0, 5, "message");
         when(restTemplate.exchange(
-                eq(UriComponentsBuilder.fromPath(SOLVE_TASK_ENDPOINT).buildAndExpand(gameId, taskId).toString()),
+                eq(UriComponentsBuilder.fromPath(SOLVE_TASK_ENDPOINT).buildAndExpand(GAME_ID, TASK_ID).toString()),
                 eq(HttpMethod.POST),
                 any(),
                 eq(TaskResultDto.class))
         ).thenReturn(new ResponseEntity<>(expectedTaskResult, HttpStatus.OK));
 
-        TaskResultDto actualTaskResult = testObj.solveTask(gameId, taskId);
+        TaskResultDto actualTaskResult = testObj.solveTask(GAME_ID, TASK_ID);
 
         assertThat(actualTaskResult).isNotNull().isEqualTo(expectedTaskResult);
     }
 
     @Test
     void solveTask_WhenError_ShouldThrowFailedSolveTaskException() {
-        String gameId = "gameId";
-        String taskId = "taskId";
         when(restTemplate.exchange(
-                eq(UriComponentsBuilder.fromPath(SOLVE_TASK_ENDPOINT).buildAndExpand(gameId, taskId).toString()),
+                eq(UriComponentsBuilder.fromPath(SOLVE_TASK_ENDPOINT).buildAndExpand(GAME_ID, TASK_ID).toString()),
                 eq(HttpMethod.POST),
                 any(),
                 eq(TaskResultDto.class))
         ).thenThrow(new RuntimeException("Connection error"));
 
-        assertThatThrownBy(() -> testObj.solveTask(gameId, taskId))
+        assertThatThrownBy(() -> testObj.solveTask(GAME_ID, TASK_ID))
                 .isInstanceOf(FailedSolveTaskException.class)
-                .hasMessageContaining("Failed to solve taskId=" + taskId + " for gameId= " + gameId);
+                .hasMessageContaining("Failed to solve taskId=" + TASK_ID + " for gameId= " + GAME_ID);
     }
 
     @Test
     void getAllShopItems_ShouldReturnListOfItems() {
-        String gameId = "gameId";
         List<ItemDto> expectedItems = List.of(
                 new ItemDto("hpot", "Healing Potion", 50),
                 new ItemDto("cs", "Claw Sharpening", 100));
         when(restTemplate.exchange(
-                eq(UriComponentsBuilder.fromPath(GET_ALL_SHOP_ITEMS_ENDPOINT).buildAndExpand(gameId).toString()),
+                eq(UriComponentsBuilder.fromPath(GET_ALL_SHOP_ITEMS_ENDPOINT).buildAndExpand(GAME_ID).toString()),
                 eq(HttpMethod.GET),
                 any(),
                 any(ParameterizedTypeReference.class))
         ).thenReturn(new ResponseEntity<>(expectedItems, HttpStatus.OK));
 
-        List<ItemDto> actualItems = testObj.getAllShopItems(gameId);
+        List<ItemDto> actualItems = testObj.getAllShopItems(GAME_ID);
 
         assertThat(actualItems).isNotNull().isEqualTo(expectedItems);
     }
 
     @Test
     void getAllShopItems_WhenError_ShouldThrowFailedGetAllShopItemsException() {
-        String gameId = "gameId";
         when(restTemplate.exchange(
-                eq(UriComponentsBuilder.fromPath(GET_ALL_SHOP_ITEMS_ENDPOINT).buildAndExpand(gameId).toString()),
+                eq(UriComponentsBuilder.fromPath(GET_ALL_SHOP_ITEMS_ENDPOINT).buildAndExpand(GAME_ID).toString()),
                 eq(HttpMethod.GET),
                 any(),
                 any(ParameterizedTypeReference.class))
         ).thenThrow(new RuntimeException("Connection error"));
 
-        assertThatThrownBy(() -> testObj.getAllShopItems(gameId))
+        assertThatThrownBy(() -> testObj.getAllShopItems(GAME_ID))
                 .isInstanceOf(FailedGetAllShopItemsException.class)
-                .hasMessageContaining("Failed to get all shop items for gameId=" + gameId);
+                .hasMessageContaining("Failed to get all shop items for gameId=" + GAME_ID);
     }
 
     @Test
     void purchaseItem_ShouldReturnPurchaseResult() {
-        String gameId = "gameId";
-        String itemId = "itemId";
         PurchaseResultDto expectedPurchaseResult = new PurchaseResultDto(true, 1, 3, 1, 1);
         when(restTemplate.exchange(
-                eq(UriComponentsBuilder.fromPath(PURCHASE_AN_ITEM_ENDPOINT).buildAndExpand(gameId, itemId).toString()),
+                eq(UriComponentsBuilder.fromPath(PURCHASE_AN_ITEM_ENDPOINT).buildAndExpand(GAME_ID, TASK_ID).toString()),
                 eq(HttpMethod.POST),
                 any(),
                 eq(PurchaseResultDto.class))
         ).thenReturn(new ResponseEntity<>(expectedPurchaseResult, HttpStatus.OK));
 
-        PurchaseResultDto actualPurchaseResult = testObj.purchaseItem(gameId, itemId);
+        PurchaseResultDto actualPurchaseResult = testObj.purchaseItem(GAME_ID, TASK_ID);
 
         assertThat(actualPurchaseResult).isNotNull().isEqualTo(expectedPurchaseResult);
     }
 
     @Test
     void purchaseItem_WhenError_ShouldThrowFailedPurchaseItemException() {
-        String gameId = "gameId";
-        String itemId = "itemId";
         when(restTemplate.exchange(
-                eq(UriComponentsBuilder.fromPath(PURCHASE_AN_ITEM_ENDPOINT).buildAndExpand(gameId, itemId).toString()),
+                eq(UriComponentsBuilder.fromPath(PURCHASE_AN_ITEM_ENDPOINT).buildAndExpand(GAME_ID, TASK_ID).toString()),
                 eq(HttpMethod.POST),
                 any(),
                 eq(PurchaseResultDto.class))
         ).thenThrow(new RuntimeException("Connection error"));
 
-        assertThatThrownBy(() -> testObj.purchaseItem(gameId, itemId))
+        assertThatThrownBy(() -> testObj.purchaseItem(GAME_ID, TASK_ID))
                 .isInstanceOf(FailedPurchaseItemException.class)
-                .hasMessageContaining("Failed to purchase an itemId=" + itemId + " for gameId=" + gameId);
+                .hasMessageContaining("Failed to purchase an itemId=" + TASK_ID + " for gameId=" + GAME_ID);
     }
 }
 

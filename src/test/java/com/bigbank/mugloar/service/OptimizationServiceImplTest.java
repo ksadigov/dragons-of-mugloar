@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static com.bigbank.mugloar.util.Constants.GAME_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +37,7 @@ class OptimizationServiceImplTest {
                 Task.builder().taskId("3").message("message")
                         .reward(16).expiresIn(3).encrypted(null).probability("Piece of cake").build());
 
-        Task optimalTask = testObj.getOptimalTask(tasks, reputationAlertFlag);
+        Task optimalTask = testObj.findOptimalTask(tasks, reputationAlertFlag);
 
         assertThat(optimalTask.getTaskId()).isEqualTo("3");
     }
@@ -48,7 +49,7 @@ class OptimizationServiceImplTest {
         int cheapItemCost = 30;
         int expensiveItemCost = 100;
 
-        var gameStateDto = new GameStateDto("gameId", 1, 99, 2, 200, 0, 50);
+        var gameStateDto = new GameStateDto(GAME_ID, 1, 99, 2, 200, 0, 50);
         List<ItemDto> shopItems = List.of(
                 new ItemDto("hpot", "Healing Potion", 50),
                 new ItemDto("cs", "Claw Sharpening", 100),
@@ -61,7 +62,7 @@ class OptimizationServiceImplTest {
         when(gameSettings.getCheapItemCost()).thenReturn(cheapItemCost);
         when(gameSettings.getExpensiveItemCost()).thenReturn(expensiveItemCost);
 
-        List<ItemDto> optimalItems = testObj.getOptimalItems(shopItems, gameStateDto);
+        List<ItemDto> optimalItems = testObj.findOptimalItems(shopItems, gameStateDto);
 
         assertThat(optimalItems).hasSize(1).extracting("id").contains("hpot");
     }

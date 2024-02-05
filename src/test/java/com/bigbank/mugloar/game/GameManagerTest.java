@@ -4,11 +4,9 @@ import com.bigbank.mugloar.config.GameProps;
 import com.bigbank.mugloar.dto.GameStateDto;
 import com.bigbank.mugloar.dto.ReputationDto;
 import com.bigbank.mugloar.dto.TaskResultDto;
+import com.bigbank.mugloar.model.Probability;
 import com.bigbank.mugloar.model.Task;
-import com.bigbank.mugloar.service.GameService;
-import com.bigbank.mugloar.service.InvestigationService;
-import com.bigbank.mugloar.service.ShopService;
-import com.bigbank.mugloar.service.TaskService;
+import com.bigbank.mugloar.service.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.bigbank.mugloar.util.Constants.GAME_ID;
+import static com.bigbank.mugloar.util.Constants.TASK_ID;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +32,8 @@ class GameManagerTest {
     private InvestigationService investigationService;
     @Mock
     private GameProps gameSettings;
+    @Mock
+    private StatisticsService statisticsService;
 
     @InjectMocks
     private GameManager testObj;
@@ -40,10 +41,10 @@ class GameManagerTest {
 
     @Test
     void startGame_ShouldExecuteGameFlowCorrectly() {
-        GameStateDto initialGameState = new GameStateDto("gameId", 3, 0, 0, 0, 0, 0);
-        GameStateDto gameStateAfterTask = new GameStateDto("gameId", 3, 100, 0, 120, 0, 5);
-        Task optimalTask = Task.builder().taskId("1").message("message")
-                .reward(10).expiresIn(3).encrypted(null).probability("Piece of cake")
+        GameStateDto initialGameState = new GameStateDto(GAME_ID, 3, 0, 0, 0, 0, 0);
+        GameStateDto gameStateAfterTask = new GameStateDto(GAME_ID, 3, 100, 0, 120, 0, 5);
+        Task optimalTask = Task.builder().taskId(TASK_ID).message("message")
+                .reward(10).expiresIn(3).encrypted(null).probability(Probability.PIECE_OF_CAKE.getMessage())
                 .evaluationScore(10).build();
         TaskResultDto taskResultDto = new TaskResultDto(true, 3, 100, 10, 0, 5, "message");
         ReputationDto reputationDto = new ReputationDto(0, -6, 0);
@@ -65,7 +66,5 @@ class GameManagerTest {
         verify(taskService, atLeastOnce()).solveTask(any(GameStateDto.class), any(Task.class));
         verify(shopService, atLeastOnce()).doShopping(any(GameStateDto.class));
         verify(investigationService, atLeastOnce()).investigate(anyString());
-
-        assertThat(testObj.getGameScores()).isNotEmpty();
     }
 }

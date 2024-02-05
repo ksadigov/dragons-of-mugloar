@@ -1,0 +1,201 @@
+{
+	"info": {
+		"_postman_id": "ad668b8e-4a2f-4b56-8ae1-136a8e000f9f",
+		"name": "Dragons of Mugloar API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1114957"
+	},
+	"item": [
+		{
+			"name": "Start a new game",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonResponse = pm.response.json();",
+							"let gameId = jsonResponse.gameId;",
+							"console.log(\"Game ID: \"+gameId);",
+							"",
+							"pm.collectionVariables.set(\"gameId\", gameId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/game/start",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"game",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Run an investigation about your reputation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"gameId\", pm.collectionVariables.get(\"gameId\"));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/{{gameId}}/investigate/reputation",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"{{gameId}}",
+						"investigate",
+						"reputation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all messages(tasks) from messageboard",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/{{gameId}}/messages",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"{{gameId}}",
+						"messages"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Try to solve one of the message",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/{{gameId}}/solve/:adId",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"{{gameId}}",
+						"solve",
+						":adId"
+					],
+					"variable": [
+						{
+							"key": "adId",
+							"value": "JoSYTBIw"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get the listing of items available in shop",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/{{gameId}}/shop",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"{{gameId}}",
+						"shop"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Purchase an item",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/{{gameId}}/shop/buy/:itemId",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"{{gameId}}",
+						"shop",
+						"buy",
+						":itemId"
+					],
+					"variable": [
+						{
+							"key": "itemId",
+							"value": "hpot"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"console.log(\"the request about to be run is \", pm.info.requestName);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "gameId",
+			"value": ""
+		}
+	]
+}

@@ -34,7 +34,7 @@ public class MugloarApplication implements CommandLineRunner {
         int maxGameRuns = Objects.requireNonNullElse(gameSettings.getRetryLimit(), INITIAL_GAME_RETRY_LIMIT);
         log.info("Starting a batch of {} games. Please wait for all results after completion.", maxGameRuns);
 
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        ExecutorService executor = Executors.newFixedThreadPool(gameSettings.getThreadPoolSize());
         AtomicInteger gameNumber = new AtomicInteger(1);
 
         for (int i = 0; i < maxGameRuns; i++) {
@@ -43,10 +43,10 @@ public class MugloarApplication implements CommandLineRunner {
         }
 
         executor.shutdown();
-        boolean finished = executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        boolean finished = executor.awaitTermination(1, TimeUnit.HOURS);
 
         if (finished) {
-            statisticsService.printGameStats(gameManager.getGameScores());
+            statisticsService.printGameStats();
         } else {
             log.error("The games did not finish within the expected time.");
         }

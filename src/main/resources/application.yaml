@@ -16,4 +16,5 @@ app:
     reputationMaxLimit: -5
     finalScoreThreshold: 1000
     baseLifeThreshold: 2
+    threadPoolSize: 10
 

@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static com.bigbank.mugloar.util.Constants.GAME_ID;
+import static com.bigbank.mugloar.util.Constants.TASK_ID;
 import static com.bigbank.mugloar.util.MessageDecryptor.decryptMessages;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -33,46 +35,55 @@ class TaskServiceImplTest {
 
     @Test
     void getTasks_WithoutDecryptionRequirement_ShouldReturnTasks() {
-        String gameId = "gameId";
         List<MessageDto> mockedMessages = List.of(generateMockMessageDtoWithoutEncryption());
-        when(mugloarApiClient.getAllMessages(gameId)).thenReturn(mockedMessages);
+        when(mugloarApiClient.getAllMessages(GAME_ID)).thenReturn(mockedMessages);
         List<Task> expectedTasks = TaskMapper.INSTANCE.toTaskList(mockedMessages);
 
-        List<Task> tasks = testObj.getTasks(gameId);
+        List<Task> tasks = testObj.getTasks(GAME_ID);
 
-        verify(mugloarApiClient).getAllMessages(gameId);
+        verify(mugloarApiClient).getAllMessages(GAME_ID);
         assertThat(tasks).isNotNull().isEqualTo(expectedTasks);
     }
 
     @Test
     void getTasks_WithBase64DecryptionRequirement_ShouldReturnTasks() {
-        String gameId = "gameId";
         List<MessageDto> mockedMessages = List.of(generateMockMessageDtoWithBase64());
-        when(mugloarApiClient.getAllMessages(gameId)).thenReturn(mockedMessages);
+        when(mugloarApiClient.getAllMessages(GAME_ID)).thenReturn(mockedMessages);
         List<Task> expectedTasks = TaskMapper.INSTANCE.toTaskList(decryptMessages(mockedMessages));
 
-        List<Task> tasks = testObj.getTasks(gameId);
+        List<Task> tasks = testObj.getTasks(GAME_ID);
 
-        verify(mugloarApiClient).getAllMessages(gameId);
+        verify(mugloarApiClient).getAllMessages(GAME_ID);
         assertThat(tasks).isNotNull().isEqualTo(expectedTasks);
     }
 
     @Test
     void getTasks_WithRot13DecryptionRequirement_ShouldReturnTasks() {
-        String gameId = "gameId";
         List<MessageDto> mockedMessages = List.of(generateMockMessageDtoWithRot13());
-        when(mugloarApiClient.getAllMessages(gameId)).thenReturn(mockedMessages);
+        when(mugloarApiClient.getAllMessages(GAME_ID)).thenReturn(mockedMessages);
         List<Task> expectedTasks = TaskMapper.INSTANCE.toTaskList(decryptMessages(mockedMessages));
 
-        List<Task> tasks = testObj.getTasks(gameId);
+        List<Task> tasks = testObj.getTasks(GAME_ID);
 
-        verify(mugloarApiClient).getAllMessages(gameId);
+        verify(mugloarApiClient).getAllMessages(GAME_ID);
+        assertThat(tasks).isNotNull().isEqualTo(expectedTasks);
+    }
+
+    @Test
+    void getTasks_WithUnknownDecryptionRequirement_ShouldReturnEmptyTasks() {
+        List<MessageDto> mockedMessages = List.of(generateMockMessageDtoWithUnknownDecryption());
+        when(mugloarApiClient.getAllMessages(GAME_ID)).thenReturn(mockedMessages);
+        List<Task> expectedTasks = TaskMapper.INSTANCE.toTaskList(decryptMessages(mockedMessages));
+
+        List<Task> tasks = testObj.getTasks(GAME_ID);
+
+        verify(mugloarApiClient).getAllMessages(GAME_ID);
         assertThat(tasks).isNotNull().isEqualTo(expectedTasks);
     }
 
     @Test
     void solveTask_WithGameStateAndTask_ShouldReturnExpectedTaskResultDto() {
-        GameStateDto gameStateDto = new GameStateDto("gameId", 3, 100, 3, 63, 0, 5);
+        GameStateDto gameStateDto = new GameStateDto(GAME_ID, 3, 100, 3, 63, 0, 5);
         Task task = generateMockTask();
         TaskResultDto expectedTaskResultDto = new TaskResultDto(true, 3, 100, 63, 0, 5, "message");
         when(mugloarApiClient.solveTask(gameStateDto.getGameId(), task.getTaskId())).thenReturn(expectedTaskResultDto);
@@ -88,16 +99,16 @@ class TaskServiceImplTest {
         boolean reputationAlertFlag = false;
         List<Task> tasks = List.of(generateMockTask());
         Task expectedTask = tasks.get(0);
-        when(optimizationService.getOptimalTask(tasks, reputationAlertFlag)).thenReturn(expectedTask);
+        when(optimizationService.findOptimalTask(tasks, reputationAlertFlag)).thenReturn(expectedTask);
 
         Task optimalTask = testObj.chooseOptimalTask(tasks, reputationAlertFlag);
 
-        verify(optimizationService).getOptimalTask(tasks, reputationAlertFlag);
+        verify(optimizationService).findOptimalTask(tasks, reputationAlertFlag);
         assertThat(optimalTask).isNotNull().isEqualTo(expectedTask);
     }
 
     private Task generateMockTask() {
-        return Task.builder().taskId("1aaa").message("message")
+        return Task.builder().taskId(TASK_ID).message("message")
                 .reward(12).expiresIn(3).encrypted(null).probability("Piece of cake").evaluationScore(101).build();
     }
 
@@ -111,5 +122,9 @@ class TaskServiceImplTest {
 
     private MessageDto generateMockMessageDtoWithoutEncryption() {
         return new MessageDto("QwWnKPr2", "description", 10, 5, null, "Piece of cake");
+    }
+
+    private MessageDto generateMockMessageDtoWithUnknownDecryption() {
+        return new MessageDto("a1a1a1a1a1=", "b2b2b2b2b2b2=", 10, 5, 3, "c3c3c3c3c3c3c");
     }
 }
