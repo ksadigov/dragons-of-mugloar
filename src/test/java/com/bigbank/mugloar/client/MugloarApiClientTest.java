@@ -2,6 +2,7 @@ package com.bigbank.mugloar.client;
 
 import com.bigbank.mugloar.dto.*;
 import com.bigbank.mugloar.exception.*;
+import com.bigbank.mugloar.model.Probability;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,7 +36,7 @@ class MugloarApiClientTest {
 
     @Test
     void startNewGame_ShouldReturnGameStateDto() {
-        GameStateDto expectedDto = new GameStateDto("gameId", 3, 0, 0, 0, 0, 0);
+        GameStateDto expectedDto = new GameStateDto(GAME_ID, 3, 0, 0, 0, 0, 0);
         when(restTemplate.exchange(
                 eq(MugloarApiClient.START_NEW_GAME_ENDPOINT),
                 eq(HttpMethod.POST),
@@ -93,7 +94,7 @@ class MugloarApiClientTest {
 
     @Test
     void getAllMessages_ShouldReturnListOfMessages() {
-        List<MessageDto> expectedMessages = List.of(new MessageDto("QwWnKPr2", "description", 10, 5, null, "Piece of cake"));
+        List<MessageDto> expectedMessages = List.of(new MessageDto(TASK_ID, "description", 10, 5, null, Probability.PIECE_OF_CAKE.getMessage()));
         when(restTemplate.exchange(
                 anyString(),
                 eq(HttpMethod.GET),
