@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.bigbank.mugloar.util.Constants.GAME_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,7 +25,7 @@ class GameServiceImplTest {
 
     @Test
     void playGame_ShouldStartNewGameAndReturnGameState() {
-        GameStateDto expectedGameState = new GameStateDto("gameId", 3, 0, 0, 0, 0, 0);
+        GameStateDto expectedGameState = new GameStateDto(GAME_ID, 3, 0, 0, 0, 0, 0);
         when(mugloarApiClient.startNewGame()).thenReturn(expectedGameState);
 
         GameStateDto actualGameState = testObj.playGame();
