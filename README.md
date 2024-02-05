@@ -34,3 +34,24 @@ Winning the game depends on:
 - The strategic selection of tasks, prioritizing those with the best balance of risk and reward.
 - Effective resource management, particularly in terms of gold, to ensure the player can afford crucial items when
   needed.
+
+## API Testing with Postman
+
+To facilitate the exploration and testing of the Dragons of Mugloar API, we've included a Postman collection. Follow the
+steps below to import this collection into Postman and begin testing:
+
+### Importing the Collection
+
+1. **Download the Postman Collection**: Locate the `Dragons of Mugloar API.postman_collection.json` file within the
+   project
+   directory. Typically, you can find it in the [postman](postman) folder.
+2. **Open Postman** and click on the `Import` button at the top left corner.
+3. **Choose the File to Import**: Drag and drop the `Dragons of Mugloar API.postman_collection.json` file into the
+   Postman
+   window
+   or use the file picker to locate and select the file.
+4. **Importing**: Once selected, Postman will import the collection, and you'll be ready to start making requests to the
+   API.
+
+This collection has ready-to-use requests for the game's API, letting you test features and see how the game uses the
+API.
