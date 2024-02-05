@@ -39,7 +39,7 @@ public class GameManager {
         } while (gameState.getScore() < gameSettings.getFinalScoreThreshold() && gameState.getLives() > 0);
 
         statisticsService.addGameScore(gameState.getScore());
-        log.info("Game {} finished. Details - Score: {}, High Score: {}, Lives: {}, Gold: {}, Level: {}, Turn: {}, Game ID: {}",
+        log.info("Game {} finished. Details - Score={}, High Score={}, Lives={}, Gold={}, Level={}, Turn={}, Game ID={}",
                 gameNumber,
                 gameState.getScore(),
                 gameState.getHighScore(),
