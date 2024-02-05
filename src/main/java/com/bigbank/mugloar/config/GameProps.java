@@ -16,5 +16,6 @@ public class GameProps {
     private Integer reputationMaxLimit;
     private Integer finalScoreThreshold;
     private Integer baseLifeThreshold;
+    private Integer threadPoolSize;
 }
 
